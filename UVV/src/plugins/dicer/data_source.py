@@ -77,6 +77,10 @@ class Dices(object):
         self.ex_dice = None
         self.ex_dice_type = 1
         self._ex_result = ""
+        self.username = ""
+        self.skillname = ""
+        self.groupid = 0
+        self.groupname = ""
 
     def real_dice(self):
         if self.faces == 100:
@@ -117,24 +121,23 @@ class Dices(object):
             self._a_check_result = ""
             return self._a_check_result
         if self.result == 100:
-            self._a_check_result = " 大失败！"
+            self._a_check_result = "    大失败！"
         elif self.anum < 50 and self.result > 95:
-            self._a_check_result = "\n检定值%d %d>95 大失败！" % (
-                self.anum, self.result)
+            self._a_check_result = " > 95    大失败！"
         elif self.result == 1:
-            self._a_check_result = " 大成功！"
+            self._a_check_result = "    大成功！"
         elif self.result <= self.anum // 5:
-            self._a_check_result = "\n检定值%d %d≤%d 极难成功" % (
-                self.anum, self.result, self.anum // 5)
+            self._a_check_result = " ≤ (%d ÷ 5)    极难成功" % (
+                self.anum)
         elif self.result <= self.anum // 2:
-            self._a_check_result = "\n检定值%d %d≤%d 困难成功" % (
-                self.anum, self.result, self.anum // 2)
+            self._a_check_result = " ≤ (%d ÷ 2)    困难成功" % (
+                self.anum)
         elif self.result <= self.anum:
-            self._a_check_result = "\n检定值%d %d≤%d 成功" % (
-                self.anum, self.result, self.anum)
+            self._a_check_result = " ≤ %d    成功" % (
+                self.anum)
         else:
-            self._a_check_result = "\n检定值%d %d>%d 失败" % (
-                self.anum, self.result, self.anum)
+            self._a_check_result = " > %d    失败" % (
+                self.anum)
         return self._a_check_result
 
     def xdy(self):
@@ -159,21 +162,24 @@ class Dices(object):
             self._ex_result = "%s%s%d" % (str(
                 self.result) if self.dices == 1 else "", "+" if self.ex_dice_type == 1 else "-", self.ex_dice)
             self.result += ex_result
+            self.anum += ex_result
         elif type(self.ex_dice) == Dices:
             self.ex_dice.roll
             ex_result = self.ex_dice_type*self.ex_dice.result
             self._ex_result = "%s%s%d" % (str(
                 self.result) if self.dices == 1 else "", "+" if self.ex_dice_type == 1 else "-", self.ex_dice)
             self.result += ex_result
+            self.anum += ex_result
         return self._ex_result
 
     def roll(self):
-        r = "%d次投掷：" % self.times
+        r = ""
         if self.times != 1:
             r += "\n"
         for _ in range(self.times):
             xdyr = self.xdy()
             self._ex_handle()
+            self.a_check()
             self._head = "%sD%d%s=" % (
                 "" if self.dices == 1 else str(self.dices),
                 self.faces,
@@ -188,7 +194,15 @@ class Dices(object):
             self.times -= 1
             if self.times:
                 r += "\n"
-        return r
+
+        table = {"name" : self.username, "content" : r}
+        if self.h:
+            table["groupname"] = self.groupname
+            table["groupid"] = self.groupid
+            return FormatMessageByName("Hide_Roll", table)
+        else:
+            table["skill"] = self.skillname.replace(" ","").replace("h","")
+            return FormatMessageByName("Normal_Roll",table)
 
 
 def prework(args: list, start=0):
@@ -203,10 +217,13 @@ def prework(args: list, start=0):
     return True
 
 
-def rd(arg: str):
+def Do_Dice(arg: str, username = "", groupid = 0, groupname = ""):
     try:
-        h = False
         dices = Dices()
+        dices.h = False
+        dices.username = username
+        dices.groupid = groupid
+        dices.groupname = groupname
         args = re.split("(\\d+)", arg.lower())
         prework(args)
         args = Mylist(args)
@@ -223,12 +240,12 @@ def rd(arg: str):
                 dices.faces = int(args[i+1])
             elif args[i] == " " and re.search("\\d+", args.next(i)) and dices.a:
                 dices.anum = int(args[i+1])
-            elif args[i] == "h":
-                h = True
+            elif args[i] == "h" and groupid != 0:
+                dices.h = True
             elif re.search("\\d+", args[i]):
                 if args.next(i) == "d":
                     dices.dices = int(args[i])
-                elif args[i-1] == " " and dices.a:
+                elif dices.a and dices.anum == 0:
                     dices.anum = int(args[i])
             elif args[i] in ["-", "+"]:
                 dices.ex_dice_type = (-1 if args[i] == "-" else 1)
@@ -238,12 +255,14 @@ def rd(arg: str):
                     dices.ex_dice.faces = int(args.next(i+2))
                 elif args.next(i):
                     dices.ex_dice = int(args.next(i))
-        if h:
-            return [dices.roll()]
-        return dices.roll()
+            else:
+                dices.skillname += args[i]
+        if dices.h:
+            return True, dices.roll()
+        return False, dices.roll()
     except:
         return r_help_message
 
 
 if __name__ == "__main__":
-    rd("2d100")
+    print(Do_Dice("a50", "zyw"))

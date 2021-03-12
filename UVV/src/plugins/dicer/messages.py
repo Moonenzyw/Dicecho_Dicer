@@ -1,3 +1,18 @@
+def GetMessageByName(name):
+	if Message[name] != None:
+		return Message[name]
+	else:
+		return "Undefined Message : " + name
+
+def FormatMessageByName(name, dict):
+    if Message[name] != None:
+        try:
+            return Message[name].format(**dict)
+        except Exception as e:
+            return "Undefined Parameters :" + str(e)
+    else:
+        return "Undefined Message : " + name
+
 main_help_message: str = "本骰娘由nonebot2强力驱动\n" \
                          ".r    投掷指令 todo\n" \
                          "    d   制定骰子面数\n" \
@@ -253,3 +268,9 @@ manias = [
     "99) 嗜外狂（Xenomania）：痴迷于异国的事物。",
     "100) 喜兽癖（Zoomania）：对待动物的态度近乎疯狂地友好。"
 ]
+
+Message = {}
+#name : 用户的昵称。 skill ： 检定技能名。 content ： 投掷计算表达式。  result ： 检定结果
+Message["Normal_Roll"] = "{name} 进行投掷 {skill} : {content}"
+Message["Hide_Roll"] = "{name} 在 群({groupname})[{groupid}] 进行暗骰： {content}"
+Message["Hide_GroupMessage"] = "{name} 进行了一次暗骰。"

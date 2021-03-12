@@ -1,7 +1,8 @@
-from .data_source import rd, help_message, st, en
+from .data_source import Do_Dice, help_message, st, en
 from .madness import ti, li
 from .create import Investigator
 from .san_check import sc
+from .messages import *
 
 from nonebot.plugin import on_startswith
 from nonebot.adapters.cqhttp import Bot, Event
@@ -37,11 +38,18 @@ async def rdcommandhandler(bot: Bot, event: Event):
     args = str(event.get_message())[2:].strip()
     uid = event.get_session_id()
     if args and not("." in args):
-        rrd = rd(args)
-        if type(rrd) == str:
+        groupid = event.group_id if event.get_event_name().startswith("message.group") else 0
+        groupname = ""
+        if groupid != 0:
+            res = await bot.get_group_info(group_id=groupid)
+            groupname = res["group_name"]
+
+        isHide, rrd = Do_Dice(args, event.sender.nickname, groupid, str(groupname))
+        if not isHide:
             await rdcommand.finish(rrd)
-        elif type(rrd) == list:
-            await bot.send_private_msg(user_id=uid, message=rrd[0])
+        else:
+            await bot.send_group_msg(group_id=event.group_id, message=FormatMessageByName("Hide_GroupMessage",{"name" : event.sender.nickname}))
+            await bot.send_private_msg(user_id=uid, message=rrd)
 
 
 @coc.handle()
