@@ -1,11 +1,11 @@
 from .rXdY import r
+from ..common.CommonFunc import *
+from .CardManager import *
 
-from nonebot.plugin import require
 from nonebot.adapters.cqhttp import Bot, Event
 
 import random
 
-require_Card = require("dicer_with_card")
 
 #rd
 rdcmd = on_dicerCmd("rd", 2)
@@ -13,8 +13,8 @@ rdcmd = on_dicerCmd("rd", 2)
 async def rdhandle(bot: Bot, event: Event):
     args = str(event.get_message())[3:].strip()
     pa = {}
-    pa["name"] = require_Card.GetCardName(bot,event)
-    pa["content"] = r("d100" + args)
+    pa["name"] = GetCardName(bot,event)
+    pa["content"] = r("d100" + args)[0]
     await rdcmd.finish(FormatMessageByName("Normal_Roll", pa))
 
 #rp
@@ -23,14 +23,15 @@ rpcmd = on_dicerCmd("rp", 2)
 async def rphandle(bot: Bot, event: Event):
     args = str(event.get_message())[3:].strip()
     pa = {}
-    pa["name"] = require_Card.GetCardName(bot,event)
+    pa["name"] = GetCardName(bot,event)
     pa["content"] = rp(args)
     await rpcmd.finish(FormatMessageByName("Normal_Roll", pa))
 
 def rp(args):
-    pnum = re.match("[0-9]*",args).group()
+    matc = re.search("[0-9]+",args)
+    pnum = matc.group() if matc else ""
     num = 1
-    if len(pnum) >= 0:
+    if len(pnum) > 0:
         num = int(pnum)
     if num >= 10:
         return "惩罚骰数过多。"
@@ -53,14 +54,15 @@ rbcmd = on_dicerCmd("rb", 2)
 async def rbhandle(bot: Bot, event: Event):
     args = str(event.get_message())[3:].strip()
     pa = {}
-    pa["name"] = require_Card.GetCardName(bot,event)
+    pa["name"] = GetCardName(bot,event)
     pa["content"] = rb(args)
     await rbcmd.finish(FormatMessageByName("Normal_Roll", pa))
 
 def rb(args):
-    pnum = re.match("[0-9]*",args).group()
+    matc = re.search("[0-9]+",args)
+    pnum = matc.group() if matc else ""
     num = 1
-    if len(pnum) >= 0:
+    if len(pnum) > 0:
         num = int(pnum)
     if num >= 10:
         return "奖励骰数过多。"

@@ -10,22 +10,22 @@ racmd = on_dicerCmd("ra", 2)
 @racmd.handle()
 async def rahandle(bot: Bot, event: Event):
     pa = {}
-    pa["name"] = require_Card.GetCardName(bot, event)
+    pa["name"] = GetCardName(bot, event)
     
     args = str(event.get_message())[3:].strip()
-    anumstr = re.search("[0-9]*",args).group()
+    sear = re.search("[0-9]+",args)
+    anumstr = sear.group() if sear else ""
     anum = 0
     if len(anumstr)==0:
         anum = GetCardAttribute(bot, event, args)
     else:
         anum = int(anumstr)
-    
     pa["content"] = ra(anum, args.replace(anumstr,""))
     await racmd.finish(FormatMessageByName("Check_Roll", pa))
 
 def ra(anum : int, args : str):
     if anum < 0:
-        return "人物卡未设置或没有对应属性！"
+        return "人物卡未设置且未给定检定属性值！"
     
     rnd = random.randint(1,100)
     resend = ""
@@ -45,4 +45,4 @@ def ra(anum : int, args : str):
     else:
         resend = " 失败"
 
-    res = args + " : D100=" + str(rnd) + '/' + anum + resend
+    return args + " : D100=" + str(rnd) + '/' + str(anum) + resend

@@ -2,21 +2,20 @@
 import random
 from ..common.CommonFunc import *
 from ..common.Message import *
+from .CardManager import *
 
-from nonebot.plugin import require
 from nonebot.adapters.cqhttp import Bot, Event
-require_Card = require("dicer_with_card")
 
 ticmd = on_dicerCmd("ti", 2)
 @ticmd.handle()
 async def tihandle(bot: Bot, event: Event):
-    await ticmd.finish(require_Card.GetCardName(bot, event) + ti())
+    await ticmd.finish(GetCardName(bot, event) + ti())
 
 
 licmd = on_dicerCmd("li", 2)
 @licmd.handle()
 async def lihandle(bot: Bot, event: Event):
-    await licmd.finish(require_Card.GetCardName(bot, event) + li())
+    await licmd.finish(GetCardName(bot, event) + li())
 
 
 

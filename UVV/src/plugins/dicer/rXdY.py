@@ -2,10 +2,9 @@ import re
 import random
 from ..common.CommonFunc import *
 from ..common.Message import *
+from .CardManager import *
 
-from nonebot.plugin import require
 from nonebot.adapters.cqhttp import Bot, Event
-require_Card = require("dicer_with_card")
 
 #r，顺序在rh，ra和rd之后，优先级往后排
 rcmd = on_dicerCmd("r", 3)
@@ -13,8 +12,8 @@ rcmd = on_dicerCmd("r", 3)
 async def rhandle(bot: Bot, event: Event):
     args = str(event.get_message())[2:].strip()
     pa = {}
-    pa["name"] = require_Card.GetCardName(bot,event)
-    pa["content"] = r(args)
+    pa["name"] = GetCardName(bot,event)
+    pa["content"] = r(args)[0]
     await rcmd.finish(FormatMessageByName("Normal_Roll", pa))
 
 #处理rXdY表达式
@@ -71,7 +70,7 @@ def r(args):
             resnum += xdy * sign
         
         args = args.replace(fullstr,"")
-        return args + " : " + resbegin + " = " + resend + ((" = " + str(resnum)) if len(cals) > 1 else "")
+        return [args + " : " + resbegin + " = " + resend + ((" = " + str(resnum)) if len(cals) > 1 else ""), resnum]
 
     except:
         return r_help_message
