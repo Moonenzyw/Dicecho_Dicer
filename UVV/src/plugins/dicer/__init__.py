@@ -10,7 +10,6 @@ from nonebot.adapters.cqhttp import Bot, Event
 rdhelp = on_startswith(".help", priority=2)
 stcommand = on_startswith(".st", priority=2)
 encommand = on_startswith(".en", priority=2)
-ticommand = on_startswith(".ti", priority=2)
 licommand = on_startswith(".li", priority=2)
 coc = on_startswith(".coc", priority=2)
 sccommand = on_startswith(".sc", priority=2)
@@ -62,12 +61,6 @@ async def cochandler(bot: Bot, event: Event):
     inv = Investigator()
     inv.age_change(args)
     await coc.finish(inv.output())
-
-
-@ticommand.handle()
-async def ticommandhandler(bot: Bot):
-    await ticommand.finish(ti())
-
 
 @licommand.handle()
 async def licommandhandler(bot: Bot):
